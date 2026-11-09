@@ -84,6 +84,17 @@ function el(tag, className, text) {
 }
 
 /**
+ * 要素の中身をすべて取り除く。
+ * （replaceChildren は古い iOS のブラウザで使えないため、この関数を使う）
+ * @param {HTMLElement} node 対象の要素
+ */
+function clearChildren(node) {
+    while (node.firstChild) {
+        node.removeChild(node.firstChild);
+    }
+}
+
+/**
  * id から要素を取得する。
  * @param {string} id 要素の id
  * @returns {HTMLElement} 要素
@@ -108,13 +119,13 @@ function showDialog(options) {
         $('modal-message').textContent = options.message;
 
         const extra = $('modal-extra');
-        extra.replaceChildren();
+        clearChildren(extra);
         if (options.extra) {
             extra.append(options.extra);
         }
 
         const actions = $('modal-actions');
-        actions.replaceChildren();
+        clearChildren(actions);
         options.buttons.forEach((button) => {
             const node = el('button', `btn ${button.className || 'btn-secondary'}`, button.label);
             node.type = 'button';
@@ -359,7 +370,7 @@ function renderHomeSummary() {
     });
 
     const summary = $('home-summary');
-    summary.replaceChildren();
+    clearChildren(summary);
     STATUS_ORDER.forEach((key) => {
         const item = el('div', `summary-item ${STATUS[key].cls}`);
         item.append(el('span', 'summary-label', STATUS[key].label), el('span', 'summary-num', String(counts[key])));
@@ -373,7 +384,7 @@ function renderHomeSummary() {
 function renderHomeFilter() {
     const tabs = [{ key: 'all', label: 'ぜんいん' }].concat(CLASSES.map((name) => ({ key: name, label: name })));
     const filter = $('home-filter');
-    filter.replaceChildren();
+    clearChildren(filter);
     tabs.forEach((tab) => {
         const button = el('button', 'filter-tab', tab.label);
         button.type = 'button';
@@ -433,7 +444,7 @@ function createChildItem(child, options) {
  */
 function renderHomeList() {
     const list = $('home-list');
-    list.replaceChildren();
+    clearChildren(list);
     const children = app.roster.filter((child) => app.filter === 'all' || child.className === app.filter);
     if (children.length === 0) {
         list.append(el('li', 'empty', '該当する園児はいません'));
@@ -475,7 +486,7 @@ function openStartScreen() {
  */
 function renderStart() {
     const types = $('start-types');
-    types.replaceChildren();
+    clearChildren(types);
     Object.keys(ROLLCALL_TYPES).forEach((key) => {
         const type = ROLLCALL_TYPES[key];
         const button = el('button', 'choice');
@@ -496,7 +507,7 @@ function renderStart() {
     $('start-course-area').hidden = !needsCourse;
 
     const courses = $('start-courses');
-    courses.replaceChildren();
+    clearChildren(courses);
     BUS_COURSES.forEach((key) => {
         const button = el('button', 'choice');
         button.type = 'button';
@@ -511,7 +522,7 @@ function renderStart() {
 
     // 対象者のプレビュー
     const preview = $('start-preview');
-    preview.replaceChildren();
+    clearChildren(preview);
     const ready = app.startType !== null && (!needsCourse || app.startCourse !== null);
     let targets = [];
     if (ready) {
@@ -578,7 +589,7 @@ function renderSession() {
 
     // まだ確認できていない子
     const left = $('session-left');
-    left.replaceChildren();
+    clearChildren(left);
     if (leftCodes.length === 0) {
         left.append(el('li', 'empty', '対象の子は全員確認できました'));
     } else {
@@ -587,7 +598,7 @@ function renderSession() {
 
     // 確認済み（新しく追加した子を上に）
     const done = $('session-done');
-    done.replaceChildren();
+    clearChildren(done);
     if (session.confirmed.length === 0) {
         done.append(el('li', 'empty', '「読み取る」を押して名札を読み取ってください'));
     } else {
@@ -610,7 +621,7 @@ function renderSession() {
  * @param {Array<{type: string, text: string}>} messages メッセージ（type: ok / warn / error）
  */
 function renderReadResult(box, messages) {
-    box.replaceChildren();
+    clearChildren(box);
     box.hidden = !messages || messages.length === 0;
     if (box.hidden) {
         return;
@@ -811,7 +822,7 @@ function openWarningScreen() {
  */
 function renderWarning() {
     const list = $('warning-list');
-    list.replaceChildren();
+    clearChildren(list);
 
     app.warningCodes.forEach((code) => {
         const child = app.rosterMap[code];
@@ -1125,7 +1136,7 @@ function handleAbsenceSubmit(event) {
  */
 function renderAbsenceList() {
     const list = $('absence-list');
-    list.replaceChildren();
+    clearChildren(list);
     const today = todayKey();
     const absences = loadData(STORAGE_KEYS.absences, [])
         .filter((item) => item.date >= today)
@@ -1208,7 +1219,7 @@ function renderHistory() {
     $('history-date').textContent = `${formatDateLabel(today)} の点呼記録`;
 
     const list = $('history-list');
-    list.replaceChildren();
+    clearChildren(list);
     const records = loadData(STORAGE_KEYS.records, []).filter((record) => record.date === today);
 
     if (records.length === 0) {
@@ -1339,7 +1350,8 @@ function showLoadError() {
     document.querySelectorAll('.screen').forEach((screen) => {
         screen.hidden = true;
     });
-    document.querySelector('.app-main').prepend(box);
+    const main = document.querySelector('.app-main');
+    main.insertBefore(box, main.firstChild);
 }
 
 /**

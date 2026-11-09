@@ -105,7 +105,7 @@ button {
 }
 
 /* 下部固定バーがある画面は、その分の余白を空ける */
-.screen:has(.bottom-bar) {
+.screen-with-bar {
     padding-bottom: 96px;
 }
 
@@ -869,7 +869,10 @@ textarea.form-control {
 /* ---------- ダイアログ ---------- */
 .modal {
     position: fixed;
-    inset: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
     z-index: 100;
     display: flex;
     align-items: center;
