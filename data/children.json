@@ -1,0 +1,14 @@
+[
+  { "code": "1", "name": "あおき はると", "className": "ひよこ組", "course": "A" },
+  { "code": "2", "name": "いしだ めい", "className": "ひよこ組", "course": "A" },
+  { "code": "3", "name": "うえの そうた", "className": "ひよこ組", "course": "B" },
+  { "code": "4", "name": "えんどう ゆい", "className": "ひよこ組", "course": "walk" },
+  { "code": "5", "name": "おかだ れん", "className": "うさぎ組", "course": "A" },
+  { "code": "6", "name": "かとう ひな", "className": "うさぎ組", "course": "B" },
+  { "code": "7", "name": "きむら ゆうと", "className": "うさぎ組", "course": "B" },
+  { "code": "8", "name": "くどう さくら", "className": "うさぎ組", "course": "walk" },
+  { "code": "9", "name": "こばやし いつき", "className": "きりん組", "course": "A" },
+  { "code": "10", "name": "さとう りこ", "className": "きりん組", "course": "A" },
+  { "code": "11", "name": "しみず あおい", "className": "きりん組", "course": "B" },
+  { "code": "12", "name": "すずき みなと", "className": "きりん組", "course": "walk" }
+]

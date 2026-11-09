@@ -2,10 +2,184 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>__REPO__</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <meta name="theme-color" content="#f59e0b">
+    <title>えんじ点呼</title>
+    <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-    <h1>Hello World - __REPO__</h1>
+    <!-- ヘッダー（全画面共通） -->
+    <header class="app-header">
+        <button type="button" class="header-back" id="header-back" hidden aria-label="ホームに戻る">‹ もどる</button>
+        <h1 class="header-title" id="header-title">えんじ点呼</h1>
+        <span class="header-date" id="header-date"></span>
+    </header>
+
+    <main class="app-main">
+        <!-- ===== ホーム画面（在籍一覧） ===== -->
+        <section class="screen" id="screen-home" data-title="えんじ点呼">
+            <!-- 置き去り警告（バス降車で確認できなかった子がいる場合） -->
+            <button type="button" class="alert alert-danger" id="home-alert-danger" hidden>
+                <span class="alert-icon" aria-hidden="true">⚠</span>
+                <span class="alert-body">
+                    <strong id="home-alert-danger-title"></strong>
+                    <span id="home-alert-danger-names" class="alert-names"></span>
+                    <span class="alert-link">タップして車内確認へ</span>
+                </span>
+            </button>
+            <!-- バス運行中のお知らせ -->
+            <div class="alert alert-info" id="home-alert-bus" hidden>
+                <span class="alert-icon" aria-hidden="true">🚌</span>
+                <span class="alert-body" id="home-alert-bus-text"></span>
+            </div>
+
+            <div class="summary" id="home-summary"></div>
+
+            <div class="filter-tabs" id="home-filter" role="tablist"></div>
+
+            <ul class="child-list" id="home-list"></ul>
+
+            <div class="home-actions">
+                <button type="button" class="btn btn-primary btn-xl" id="btn-start-rollcall">点呼をはじめる</button>
+                <div class="btn-row">
+                    <button type="button" class="btn btn-secondary" id="btn-open-absence">欠席連絡</button>
+                    <button type="button" class="btn btn-secondary" id="btn-open-history">点呼履歴</button>
+                </div>
+            </div>
+
+            <div class="footer-tools">
+                <button type="button" class="btn btn-text" id="btn-reset">データをリセット</button>
+                <p class="disclaimer">※このアプリはインターン学習用のサンプルです。実際の園児の安全管理には使用できません。登場する名前はすべて架空です。</p>
+            </div>
+        </section>
+
+        <!-- ===== 点呼開始画面 ===== -->
+        <section class="screen" id="screen-start" data-title="点呼をはじめる" hidden>
+            <h2 class="section-title">点呼の種類</h2>
+            <div class="choice-grid" id="start-types"></div>
+
+            <div id="start-course-area" hidden>
+                <h2 class="section-title">バスのコース</h2>
+                <div class="choice-grid choice-grid-2" id="start-courses"></div>
+            </div>
+
+            <div class="start-preview" id="start-preview"></div>
+
+            <button type="button" class="btn btn-primary btn-xl" id="btn-begin-session" disabled>点呼を開始</button>
+        </section>
+
+        <!-- ===== 点呼中画面 ===== -->
+        <section class="screen" id="screen-session" data-title="点呼中" hidden>
+            <div class="session-head">
+                <span class="session-label" id="session-label"></span>
+                <div class="session-counts">
+                    <div class="count-box count-done">
+                        <span class="count-caption">確認済み</span>
+                        <span class="count-num" id="session-count-done">0</span>
+                    </div>
+                    <div class="count-box count-left">
+                        <span class="count-caption">未確認</span>
+                        <span class="count-num" id="session-count-left">0</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="read-result" id="session-result" hidden></div>
+
+            <h2 class="section-title">まだ確認できていない子</h2>
+            <ul class="name-chips name-chips-left" id="session-left"></ul>
+
+            <h2 class="section-title">確認済み</h2>
+            <ul class="child-list child-list-compact" id="session-done"></ul>
+
+            <div class="bottom-bar">
+                <button type="button" class="btn btn-secondary" id="btn-session-cancel">中止</button>
+                <button type="button" class="btn btn-primary btn-read" id="btn-session-read">読み取る</button>
+                <button type="button" class="btn btn-accent" id="btn-session-finish">確定</button>
+            </div>
+        </section>
+
+        <!-- ===== 置き去り警告画面 ===== -->
+        <section class="screen screen-danger" id="screen-warning" data-title="車内を確認してください" hidden>
+            <div class="warning-hero">
+                <span class="warning-icon" aria-hidden="true">⚠</span>
+                <p class="warning-lead">バスを降りたことが<br>確認できていない子がいます</p>
+                <p class="warning-sub">すぐに車内（座席の下・後方の座席まで）を確認してください</p>
+            </div>
+
+            <ul class="warning-list" id="warning-list"></ul>
+
+            <div class="read-result" id="warning-result" hidden></div>
+
+            <div class="bottom-bar">
+                <button type="button" class="btn btn-primary btn-read" id="btn-warning-read">見つけた子を読み取る</button>
+                <button type="button" class="btn btn-secondary" id="btn-warning-home">ホームへ</button>
+            </div>
+        </section>
+
+        <!-- ===== 欠席連絡画面 ===== -->
+        <section class="screen" id="screen-absence" data-title="欠席連絡" hidden>
+            <form class="form" id="absence-form" novalidate>
+                <div class="form-group">
+                    <label class="form-label" for="absence-child">園児 <span class="required">必須</span></label>
+                    <select class="form-control" id="absence-child"></select>
+                    <p class="form-error" id="absence-child-error" hidden></p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="absence-date">欠席する日 <span class="required">必須</span></label>
+                    <input class="form-control" type="date" id="absence-date">
+                    <p class="form-error" id="absence-date-error" hidden></p>
+                </div>
+
+                <fieldset class="form-group">
+                    <legend class="form-label">欠席理由 <span class="required">必須</span></legend>
+                    <div class="radio-group" id="absence-reasons"></div>
+                    <p class="form-error" id="absence-reason-error" hidden></p>
+                </fieldset>
+
+                <div class="form-group" id="absence-temp-group" hidden>
+                    <label class="form-label" for="absence-temp">体温（℃） <span class="optional">任意</span></label>
+                    <input class="form-control" type="text" inputmode="decimal" id="absence-temp" placeholder="例: 37.5" autocomplete="off">
+                    <p class="form-hint">34.0〜42.0 の数値（小数第1位まで）</p>
+                    <p class="form-error" id="absence-temp-error" hidden></p>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="absence-memo">メモ <span class="optional">任意</span></label>
+                    <textarea class="form-control" id="absence-memo" rows="4" placeholder="保護者からの連絡内容など"></textarea>
+                    <p class="form-counter" id="absence-memo-counter">あと200文字</p>
+                    <p class="form-error" id="absence-memo-error" hidden></p>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-xl">保存する</button>
+            </form>
+
+            <h2 class="section-title">登録済みの欠席連絡</h2>
+            <ul class="record-list" id="absence-list"></ul>
+        </section>
+
+        <!-- ===== 点呼履歴画面 ===== -->
+        <section class="screen" id="screen-history" data-title="点呼履歴" hidden>
+            <p class="history-date" id="history-date"></p>
+            <ul class="record-list" id="history-list"></ul>
+        </section>
+    </main>
+
+    <!-- 確認・お知らせ用のダイアログ -->
+    <div class="modal" id="modal" hidden>
+        <div class="modal-box" role="dialog" aria-modal="true" aria-labelledby="modal-message">
+            <p class="modal-message" id="modal-message"></p>
+            <div class="modal-extra" id="modal-extra"></div>
+            <div class="modal-actions" id="modal-actions"></div>
+        </div>
+    </div>
+
+    <!-- 短いお知らせ -->
+    <div class="toast" id="toast" hidden></div>
+
+    <script src="js/storage.js"></script>
+    <script src="js/reader.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
