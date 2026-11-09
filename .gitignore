@@ -9,3 +9,6 @@ _chrome_profile*/
 
 # OS が作るファイル
 .DS_Store
+
+# Visual Studio の作業ファイル
+.vs/
